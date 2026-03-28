@@ -1110,6 +1110,8 @@
       height: 100dvh;
       overflow: hidden;
     }
+
+    /* ── Game area fills remaining space ── */
     #game-area {
       flex-direction: column;
       align-items: center;
@@ -1128,14 +1130,11 @@
       border: none;
       box-shadow: none;
     }
-    /* Hide the side panel on mobile */
     #club-panel { display: none !important; }
-    /* Hide club stat on mobile (shown in dropdown instead) */
     .hud-club-stat { display: none; }
-    /* Hide desktop buttons on mobile */
     #header-desktop-btns { display: none; }
 
-    /* Header — two rows */
+    /* ── Header — two compact rows ── */
     #header {
       padding: 0;
       gap: 0;
@@ -1143,32 +1142,36 @@
       width: 100%;
     }
     #header-row1 {
-      padding: 6px 10px;
-      gap: 6px;
+      padding: clamp(3px, 1vw, 8px) clamp(6px, 2vw, 12px);
+      gap: clamp(4px, 1.5vw, 8px);
     }
-    #header-row1 h1 { font-size: 12px; letter-spacing: 1px; }
-    .hud-stats { gap: 10px; }
-    .hud-label { font-size: 8px; }
-    .hud-value { font-size: 11px; }
+    #header-row1 h1 {
+      font-size: clamp(10px, 3vw, 14px);
+      letter-spacing: 1px;
+    }
+    .hud-stats { gap: clamp(6px, 2.5vw, 14px); }
+    .hud-label { font-size: clamp(6px, 1.8vw, 9px); }
+    .hud-value { font-size: clamp(9px, 2.8vw, 13px); }
 
-    /* Row 2 — controls bar */
+    /* ── Row 2 — controls bar ── */
     #header-row2 {
       display: flex !important;
       align-items: center;
-      gap: 6px;
-      padding: 4px 10px 6px;
+      gap: clamp(4px, 1.2vw, 8px);
+      padding: clamp(2px, 0.8vw, 5px) clamp(6px, 2vw, 12px) clamp(3px, 1vw, 6px);
       background: rgba(0,0,0,0.2);
       width: 100%;
     }
     #club-dropdown {
       display: block;
       flex: 1;
-      padding: 6px 28px 6px 8px;
+      min-width: 0;
+      padding: clamp(4px, 1.5vw, 8px) clamp(24px, 7vw, 32px) clamp(4px, 1.5vw, 8px) clamp(6px, 2vw, 10px);
       background: var(--surface);
       border: 1px solid var(--border);
       color: var(--text);
       font-family: 'Space Mono', monospace;
-      font-size: 12px;
+      font-size: clamp(10px, 2.8vw, 13px);
       border-radius: 6px;
       appearance: none;
       -webkit-appearance: none;
@@ -1177,12 +1180,12 @@
       background-position: right 8px center;
     }
     .mobile-restart-btn, .mobile-holes-btn, .mobile-end-round-btn {
-      padding: 6px 10px;
+      padding: clamp(4px, 1.5vw, 8px) clamp(6px, 2vw, 12px);
       background: transparent;
       border: 1px solid var(--border);
       color: var(--text-muted);
       font-family: 'Space Mono', monospace;
-      font-size: 11px;
+      font-size: clamp(9px, 2.5vw, 12px);
       border-radius: 6px;
       cursor: pointer;
       white-space: nowrap;
@@ -1192,24 +1195,72 @@
     .mobile-holes-btn:active { border-color: var(--green); color: var(--green); }
     .mobile-end-round-btn:active { border-color: var(--red); color: var(--red); }
 
-    /* Name overlay */
-    #name-overlay h1 { font-size: 22px; }
-    #name-input { width: 200px; font-size: 14px; }
+    /* ── Name overlay ── */
+    #name-overlay h1 { font-size: clamp(18px, 6vw, 28px); }
+    #name-overlay p { font-size: clamp(11px, 3vw, 14px); }
+    #name-input { width: clamp(160px, 60vw, 260px); font-size: clamp(13px, 3.5vw, 16px); }
+    #start-btn { font-size: clamp(12px, 3vw, 14px); padding: clamp(10px, 3vw, 16px) clamp(24px, 8vw, 40px); }
 
-    /* Score overlay */
-    #score-strokes { font-size: 36px; }
-    #score-par { font-size: 16px; }
-    #play-again-btn { padding: 10px 20px; font-size: 12px; }
-    #next-hole-btn { padding: 10px 20px; font-size: 12px; }
-    #instructions { font-size: 10px; bottom: 40px; padding: 6px 12px; }
+    /* ── Score overlay ── */
+    #score-overlay { padding: clamp(12px, 4vw, 24px); }
+    #score-strokes { font-size: clamp(28px, 10vw, 48px); }
+    #score-strokes small { font-size: clamp(12px, 3.5vw, 16px); }
+    #score-par { font-size: clamp(13px, 4vw, 18px); }
+    #play-again-btn, #next-hole-btn {
+      padding: clamp(8px, 2.5vw, 14px) clamp(16px, 5vw, 32px);
+      font-size: clamp(10px, 2.8vw, 13px);
+    }
+    #instructions {
+      font-size: clamp(8px, 2.2vw, 11px);
+      bottom: clamp(20px, 6vw, 50px);
+      padding: clamp(4px, 1vw, 8px) clamp(8px, 2.5vw, 16px);
+    }
 
-    /* Hole select — leaderboards */
-    #hole-select { padding: 16px 12px 40px; }
-    #scoreboards-section { max-width: 100%; }
-    #sb-container { gap: 6px; }
-    .sb-board { width: 46%; }
-    #hs-buttons { width: 90%; max-width: 300px; }
-    #hole-select-grid { max-width: 300px; }
+    /* ── Hole select menu ── */
+    #hole-select {
+      padding: clamp(10px, 3vw, 20px) clamp(8px, 2.5vw, 16px) clamp(30px, 8vw, 50px);
+    }
+    #hs-sign-board { padding: clamp(10px, 3vw, 18px) clamp(20px, 6vw, 40px); min-width: auto; }
+    #hs-sign-board h1 { font-size: clamp(18px, 6vw, 28px); letter-spacing: clamp(2px, 1vw, 5px); }
+    #hole-select p { font-size: clamp(11px, 3vw, 14px); margin: clamp(6px, 2vw, 14px) 0 clamp(10px, 3vw, 20px); }
+    #hs-buttons { width: clamp(220px, 75vw, 300px); }
+    #green-fee-member-btn, #green-fee-btn {
+      padding: clamp(10px, 3vw, 16px) clamp(16px, 5vw, 24px);
+      font-size: clamp(12px, 3.5vw, 16px);
+      letter-spacing: clamp(1px, 0.5vw, 3px);
+    }
+    #hs-desc { font-size: clamp(9px, 2.5vw, 12px); max-width: clamp(200px, 70vw, 300px); }
+    #hs-divider, #hs-divider-lb { width: clamp(200px, 75vw, 300px); }
+    #hs-divider span, #hs-divider-lb span { font-size: clamp(8px, 2.2vw, 11px); }
+    #hole-select-grid { max-width: clamp(220px, 75vw, 340px); gap: clamp(6px, 2vw, 12px); }
+    .hole-card {
+      width: clamp(52px, 16vw, 72px);
+      padding: clamp(6px, 2vw, 12px) clamp(4px, 1.2vw, 8px) clamp(5px, 1.5vw, 10px);
+    }
+    .hole-card .hole-num { font-size: clamp(18px, 5.5vw, 28px); }
+    .hole-card .hole-par { font-size: clamp(7px, 2vw, 10px); }
+
+    /* ── Leaderboards on hole select ── */
+    #scoreboards-section { max-width: 100%; padding: clamp(10px, 3vw, 20px) clamp(8px, 2vw, 14px) clamp(8px, 2vw, 14px); }
+    #sb-container { gap: clamp(4px, 1.5vw, 10px); }
+    .sb-board {
+      width: 46%;
+      padding: clamp(5px, 1.5vw, 10px);
+    }
+    .sb-board h4 { font-size: clamp(7px, 2vw, 10px); }
+    .sb-entry { font-size: clamp(8px, 2.2vw, 11px); }
+    .sb-empty { font-size: clamp(7px, 2vw, 9px); }
+
+    /* ── Round summary ── */
+    #round-summary h1 { font-size: clamp(16px, 5vw, 22px); }
+    #round-mode { font-size: clamp(8px, 2.5vw, 11px); }
+    .scorecard-row { font-size: clamp(9px, 2.5vw, 12px); padding: clamp(3px, 1vw, 6px) clamp(6px, 2vw, 10px); }
+    #round-total { font-size: clamp(14px, 4vw, 18px); }
+    #round-done-btn { font-size: clamp(10px, 3vw, 13px); padding: clamp(8px, 2.5vw, 14px) clamp(20px, 6vw, 32px); }
+
+    /* ── Bunker / Water indicators ── */
+    #bunker-indicator { font-size: clamp(8px, 2.2vw, 11px); padding: clamp(2px, 0.6vw, 4px) clamp(6px, 2vw, 12px); }
+    #water-penalty { font-size: clamp(10px, 3vw, 14px); padding: clamp(6px, 2vw, 12px) clamp(14px, 4vw, 24px); }
   }
 </style>
 </head>
@@ -2643,14 +2694,10 @@
     const isMobile = window.innerWidth <= 680;
 
     if (isMobile) {
-      // Calculate available space after header and club bar
       const header = document.getElementById('header');
-      const clubPanel = document.getElementById('club-panel');
       const headerH = header ? header.offsetHeight : 0;
-      const clubH = clubPanel ? clubPanel.offsetHeight : 0;
-      const pad = 8;
-      const availH = window.innerHeight - headerH - clubH - pad;
-      const availW = window.innerWidth - 4;
+      const availH = (window.innerHeight || document.documentElement.clientHeight) - headerH;
+      const availW = window.innerWidth || document.documentElement.clientWidth;
       const aspect = W / VIEW_H;
       let fitH = availH;
       let fitW = fitH * aspect;
