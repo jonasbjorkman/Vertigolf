@@ -1043,11 +1043,13 @@
   }
 
   .sb-board {
-    width: 148px;
+    width: calc(50% - 6px);
+    min-width: 0;
     background: linear-gradient(180deg, #1a3a28 0%, #0f2a1c 100%);
     border: 2px solid #2a5a3a;
     border-radius: 6px;
     padding: 8px;
+    box-sizing: border-box;
   }
 
   .sb-board h4 {
@@ -1241,14 +1243,15 @@
     .hole-card .hole-par { font-size: clamp(7px, 2vw, 10px); }
 
     /* ── Leaderboards on hole select ── */
-    #scoreboards-section { max-width: 100%; padding: clamp(10px, 3vw, 20px) clamp(8px, 2vw, 14px) clamp(8px, 2vw, 14px); }
-    #sb-container { gap: clamp(4px, 1.5vw, 10px); }
+    #scoreboards-section { max-width: 100%; padding: clamp(10px, 3vw, 20px) clamp(6px, 1.5vw, 14px) clamp(8px, 2vw, 14px); overflow: visible; }
+    #sb-container { gap: clamp(4px, 1.5vw, 8px); }
     .sb-board {
-      width: 46%;
-      padding: clamp(5px, 1.5vw, 10px);
+      width: calc(50% - clamp(2px, 0.75vw, 4px));
+      padding: clamp(4px, 1.2vw, 8px);
     }
-    .sb-board h4 { font-size: clamp(7px, 2vw, 10px); }
+    .sb-board h4 { font-size: clamp(7px, 2vw, 10px); letter-spacing: 0.5px; }
     .sb-entry { font-size: clamp(8px, 2.2vw, 11px); }
+    .sb-entry-rank { width: clamp(12px, 3.5vw, 16px); }
     .sb-empty { font-size: clamp(7px, 2vw, 9px); }
 
     /* ── Round summary ── */
