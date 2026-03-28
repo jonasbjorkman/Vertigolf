@@ -43,10 +43,26 @@
     width: 100%;
     max-width: 900px;
     display: flex;
+    flex-direction: column;
+    padding: 8px 24px;
+    gap: 6px;
+  }
+
+  #header-row1 {
+    display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 16px 24px;
     gap: 16px;
+  }
+
+  #header-row2 {
+    display: none; /* hidden on desktop — clubs are in the side panel */
+  }
+
+  #header-desktop-btns {
+    display: flex;
+    gap: 8px;
+    align-items: center;
   }
 
   #header h1 {
@@ -1114,29 +1130,86 @@
     }
     /* Hide the side panel on mobile */
     #club-panel { display: none !important; }
-    /* Show the dropdown in header instead */
-    #club-dropdown { display: block; }
-    /* Hide the Club HUD stat on mobile since dropdown shows it */
-    .hud-stat:first-child { display: none; }
+    /* Hide club stat on mobile (shown in dropdown instead) */
+    .hud-club-stat { display: none; }
+    /* Hide desktop buttons on mobile */
+    #header-desktop-btns { display: none; }
+
+    /* Header — two rows */
     #header {
-      padding: 6px 10px;
-      flex-wrap: nowrap;
-      gap: 8px;
+      padding: 0;
+      gap: 0;
       flex-shrink: 0;
       width: 100%;
     }
-    #header h1 { font-size: 13px; letter-spacing: 1px; }
-    .hud-stats { gap: 8px; }
+    #header-row1 {
+      padding: 6px 10px;
+      gap: 6px;
+    }
+    #header-row1 h1 { font-size: 12px; letter-spacing: 1px; }
+    .hud-stats { gap: 10px; }
     .hud-label { font-size: 8px; }
-    .hud-value { font-size: 12px; }
-    #restart-btn { padding: 4px 8px; font-size: 10px; }
+    .hud-value { font-size: 11px; }
+
+    /* Row 2 — controls bar */
+    #header-row2 {
+      display: flex !important;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px 6px;
+      background: rgba(0,0,0,0.2);
+      width: 100%;
+    }
+    #club-dropdown {
+      display: block;
+      flex: 1;
+      padding: 6px 28px 6px 8px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      border-radius: 6px;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236b7a96'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+    }
+    .mobile-restart-btn, .mobile-holes-btn, .mobile-end-round-btn {
+      padding: 6px 10px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      border-radius: 6px;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .mobile-restart-btn:active { border-color: var(--amber); color: var(--amber); }
+    .mobile-holes-btn:active { border-color: var(--green); color: var(--green); }
+    .mobile-end-round-btn:active { border-color: var(--red); color: var(--red); }
+
+    /* Name overlay */
     #name-overlay h1 { font-size: 22px; }
     #name-input { width: 200px; font-size: 14px; }
+
+    /* Score overlay */
     #score-strokes { font-size: 36px; }
     #score-par { font-size: 16px; }
-    #leaderboard { max-height: 120px; }
-    #play-again-btn { padding: 12px 28px; font-size: 13px; }
+    #play-again-btn { padding: 10px 20px; font-size: 12px; }
+    #next-hole-btn { padding: 10px 20px; font-size: 12px; }
     #instructions { font-size: 10px; bottom: 40px; padding: 6px 12px; }
+
+    /* Hole select — leaderboards */
+    #hole-select { padding: 16px 12px 40px; }
+    #scoreboards-section { max-width: 100%; }
+    #sb-container { gap: 6px; }
+    .sb-board { width: 46%; }
+    #hs-buttons { width: 90%; max-width: 300px; }
+    #hole-select-grid { max-width: 300px; }
   }
 </style>
 </head>
@@ -1187,37 +1260,46 @@
 </div>
 
 <div id="header" class="hide">
-  <h1>VertiGolf</h1>
-  <div class="hud-stats">
-    <div class="hud-stat">
-      <span class="hud-label">Hole</span>
-      <span class="hud-value" id="hud-hole">1</span>
+  <div id="header-row1">
+    <h1>VertiGolf</h1>
+    <div class="hud-stats">
+      <div class="hud-stat">
+        <span class="hud-label">Hole</span>
+        <span class="hud-value" id="hud-hole">1</span>
+      </div>
+      <div class="hud-stat hud-club-stat">
+        <span class="hud-label">Club</span>
+        <span class="hud-value" id="hud-club">Driver</span>
+      </div>
+      <div class="hud-stat">
+        <span class="hud-label">Strokes</span>
+        <span class="hud-value" id="hud-strokes">0</span>
+      </div>
+      <div class="hud-stat">
+        <span class="hud-label">Par</span>
+        <span class="hud-value" id="hud-par">3</span>
+      </div>
     </div>
-    <div class="hud-stat">
-      <span class="hud-label">Club</span>
-      <span class="hud-value" id="hud-club">Driver</span>
-    </div>
-    <div class="hud-stat">
-      <span class="hud-label">Strokes</span>
-      <span class="hud-value" id="hud-strokes">0</span>
-    </div>
-    <div class="hud-stat">
-      <span class="hud-label">Par</span>
-      <span class="hud-value" id="hud-par">3</span>
+    <div id="header-desktop-btns">
+      <button id="restart-btn">↺ Restart</button>
+      <button id="holes-btn">⛳ Holes</button>
+      <button id="end-round-btn" class="hide">End Round</button>
     </div>
   </div>
-  <button id="restart-btn">↺ Restart</button>
-  <button id="holes-btn">⛳ Holes</button>
-  <button id="end-round-btn" class="hide">End Round</button>
-  <select id="club-dropdown">
-    <option value="driver" selected>🏌️ Driver</option>
-    <option value="5wood">🪵 5 Wood</option>
-    <option value="5iron">🔩 5 Iron</option>
-    <option value="7iron">⛳ 7 Iron</option>
-    <option value="9iron">📐 9 Iron</option>
-    <option value="wedge">🥏 Wedge</option>
-    <option value="putter">🎯 Putter</option>
-  </select>
+  <div id="header-row2">
+    <select id="club-dropdown">
+      <option value="driver" selected>🏌️ Driver</option>
+      <option value="5wood">🪵 5 Wood</option>
+      <option value="5iron">🔩 5 Iron</option>
+      <option value="7iron">⛳ 7 Iron</option>
+      <option value="9iron">📐 9 Iron</option>
+      <option value="wedge">🥏 Wedge</option>
+      <option value="putter">🎯 Putter</option>
+    </select>
+    <button class="mobile-restart-btn">↺ Restart</button>
+    <button class="mobile-holes-btn">⛳ Holes</button>
+    <button class="mobile-end-round-btn hide">End Round</button>
+  </div>
 </div>
 
 <div id="game-area" class="hide">
@@ -2408,10 +2490,10 @@
     holeSelectOverlay.classList.add('hide');
     document.getElementById('header').classList.remove('hide');
     document.getElementById('game-area').classList.remove('hide');
-    // Show End Round, hide Holes, hide/show Restart
     document.getElementById('holes-btn').classList.add('hide');
     document.getElementById('end-round-btn').classList.remove('hide');
     document.getElementById('restart-btn').classList.toggle('hide', isMember);
+    syncMobileButtons();
     selectClub('driver');
     lastRoundStrokes = 0;
     skipIntroPan = false;
@@ -2432,6 +2514,7 @@
     document.getElementById('end-round-btn').classList.add('hide');
     document.getElementById('holes-btn').classList.remove('hide');
     document.getElementById('restart-btn').classList.remove('hide');
+    syncMobileButtons();
     showHoleSelect();
   }
 
@@ -2590,10 +2673,25 @@
   window.addEventListener('resize', resizeGame);
   window.addEventListener('orientationchange', () => setTimeout(resizeGame, 200));
 
+  // ── Sync mobile and desktop buttons ──
+  function syncMobileButtons() {
+    var mRestart = document.querySelector('.mobile-restart-btn');
+    var mHoles = document.querySelector('.mobile-holes-btn');
+    var mEnd = document.querySelector('.mobile-end-round-btn');
+    var dRestart = document.getElementById('restart-btn');
+    var dHoles = document.getElementById('holes-btn');
+    var dEnd = document.getElementById('end-round-btn');
+    if (mRestart) mRestart.classList.toggle('hide', dRestart.classList.contains('hide'));
+    if (mHoles) mHoles.classList.toggle('hide', dHoles.classList.contains('hide'));
+    if (mEnd) mEnd.classList.toggle('hide', dEnd.classList.contains('hide'));
+  }
+
   playAgainBtn.addEventListener('click', playAgain);
   nextHoleBtn.addEventListener('click', nextHole);
   document.getElementById('restart-btn').addEventListener('click', restartGame);
-  document.getElementById('holes-btn').addEventListener('click', () => {
+  document.querySelector('.mobile-restart-btn').addEventListener('click', restartGame);
+  
+  function goToHoleSelect() {
     if (game) game.destroy(true);
     game = null;
     greenFeeMode = false;
@@ -2603,11 +2701,16 @@
     document.getElementById('end-round-btn').classList.add('hide');
     document.getElementById('holes-btn').classList.remove('hide');
     document.getElementById('restart-btn').classList.remove('hide');
+    syncMobileButtons();
     showHoleSelect();
-  });
+  }
+  document.getElementById('holes-btn').addEventListener('click', goToHoleSelect);
+  document.querySelector('.mobile-holes-btn').addEventListener('click', goToHoleSelect);
+
   document.getElementById('green-fee-btn').addEventListener('click', () => startGreenFee(false));
   document.getElementById('green-fee-member-btn').addEventListener('click', () => startGreenFee(true));
   document.getElementById('end-round-btn').addEventListener('click', endGreenFeeRound);
+  document.querySelector('.mobile-end-round-btn').addEventListener('click', endGreenFeeRound);
   document.getElementById('round-done-btn').addEventListener('click', () => {
     document.getElementById('round-summary').classList.add('hide');
     greenFeeMode = false;
@@ -2616,6 +2719,7 @@
     document.getElementById('end-round-btn').classList.add('hide');
     document.getElementById('holes-btn').classList.remove('hide');
     document.getElementById('restart-btn').classList.remove('hide');
+    syncMobileButtons();
     showHoleSelect();
   });
 
