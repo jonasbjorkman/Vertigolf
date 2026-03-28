@@ -1565,18 +1565,25 @@
   });
 
   // ── Canvas size ──
-  const W = 380, H = 864;
+  // ── Canvas size — dynamic width, capped ──
+  const MAX_W = 420;
+  const W = Math.min(MAX_W, Math.floor(window.innerWidth * 0.95));
+  const H = 864;
 
-  // ── Hole definitions ──
+  // Helper: percentage of width
+  function px(pct) { return Math.round(W * pct / 100); }
+  function pw(pct) { return Math.round(W * pct / 100); }
+
+  // ── Hole definitions (positions as % of width) ──
   const HOLES = [
     {
       id: 'hole1',
       par: 3,
       build(scene) {
-        scene.addPlatform(110, H - 180, 140, 12);
-        scene.addPlatform(280, H - 360, 140, 12);
-        scene.addPlatform(187, H - 530, 120, 12);
-        scene.holeX = 187;
+        scene.addPlatform(px(29), H - 180, pw(37), 12);
+        scene.addPlatform(px(74), H - 360, pw(37), 12);
+        scene.addPlatform(px(49), H - 530, pw(32), 12);
+        scene.holeX = px(49);
         scene.holeY = H - 542;
       }
     },
@@ -1584,20 +1591,16 @@
       id: 'hole2',
       par: 4,
       build(scene) {
-        // Platform 1 — wide right
-        scene.addPlatform(260, H - 180, 160, 12);
+        scene.addPlatform(px(68), H - 180, pw(42), 12);
 
-        // Platform 2 — narrow left, mostly bunker
-        scene.addPlatform(100, H - 360, 100, 12);
-        scene.addBunker(100, H - 360, 90, 12);
+        scene.addPlatform(px(26), H - 360, pw(26), 12);
+        scene.addBunker(px(26), H - 360, pw(24), 12);
 
-        // Platform 3 — narrow right
-        scene.addPlatform(290, H - 530, 90, 12);
+        scene.addPlatform(px(76), H - 530, pw(24), 12);
 
-        // Platform 4 — landing pad for hole, centre-left
-        scene.addPlatform(160, H - 690, 110, 12);
+        scene.addPlatform(px(42), H - 690, pw(29), 12);
 
-        scene.holeX = 160;
+        scene.holeX = px(42);
         scene.holeY = H - 702;
       }
     },
@@ -1605,10 +1608,9 @@
       id: 'hole3',
       par: 3,
       build(scene) {
-        // One tiny platform at the very top — go big or go home
-        scene.addPlatform(W / 2, H - 450, 70, 12);
+        scene.addPlatform(px(50), H - 450, pw(18), 12);
 
-        scene.holeX = W / 2;
+        scene.holeX = px(50);
         scene.holeY = H - 462;
       }
     },
@@ -1616,23 +1618,18 @@
       id: 'hole4',
       par: 5,
       build(scene) {
-        // Platform 1 — left side
-        scene.addPlatform(100, H - 220, 120, 12);
+        scene.addPlatform(px(26), H - 220, pw(32), 12);
 
-        // Water hazard — between platform 1 and 2
-        scene.addWater(300, H - 320, 100, 30);
+        scene.addWater(px(79), H - 320, pw(26), 30);
 
-        // Platform 2 — centre-left, with bunker
-        scene.addPlatform(176, H - 390, 110, 12);
-        scene.addBunker(176, H - 390, 90, 12);
+        scene.addPlatform(px(46), H - 390, pw(29), 12);
+        scene.addBunker(px(46), H - 390, pw(24), 12);
 
-        // Platform 3 — right side
-        scene.addPlatform(285, H - 540, 100, 12);
+        scene.addPlatform(px(75), H - 540, pw(26), 12);
 
-        // Platform 4 — landing pad for hole, left side
-        scene.addPlatform(120, H - 690, 110, 12);
+        scene.addPlatform(px(32), H - 690, pw(29), 12);
 
-        scene.holeX = 120;
+        scene.holeX = px(32);
         scene.holeY = H - 702;
       }
     },
