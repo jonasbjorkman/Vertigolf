@@ -2211,17 +2211,9 @@
     }
 
     addWater(x, y, w, h) {
-      // Water detection zone (top portion — ball falls in from above)
+      // Water detection zone — penalty triggers on surface contact
+      // No physics body needed since ball resets before passing through
       this.waterHazards.push({ x, y, w, h });
-      // Solid platform body underneath — ball bounces off from below
-      const physH = 40;
-      const bodyY = y + h / 2 + physH / 2 - 4; // position body at bottom of water
-      this.matter.add.rectangle(x, bodyY, w, physH, {
-        isStatic: true,
-        restitution: T.platBounce,
-        friction: 0.8,
-        label: 'platform',
-      });
     }
 
     addBoxWall(x, y, w, h) {
