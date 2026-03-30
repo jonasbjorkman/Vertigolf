@@ -1564,6 +1564,38 @@
     selectClub(e.target.value);
   });
 
+  // ── Club restrictions per hole ──
+  function applyClubRestrictions() {
+    const hole = getCurrentHole();
+    const allowed = hole.clubs || null; // null = all clubs allowed
+
+    // Side panel buttons
+    document.querySelectorAll('.club-btn').forEach(btn => {
+      if (allowed) {
+        btn.classList.toggle('hide', !allowed.includes(btn.dataset.club));
+      } else {
+        btn.classList.remove('hide');
+      }
+    });
+
+    // Mobile dropdown options
+    const dropdown = document.getElementById('club-dropdown');
+    Array.from(dropdown.options).forEach(opt => {
+      if (allowed) {
+        opt.disabled = !allowed.includes(opt.value);
+        opt.hidden = !allowed.includes(opt.value);
+      } else {
+        opt.disabled = false;
+        opt.hidden = false;
+      }
+    });
+
+    // Select the first allowed club
+    if (allowed) {
+      selectClub(allowed[0]);
+    }
+  }
+
   // ── Canvas size ──
   // ── Canvas size — dynamic width, capped ──
   const MAX_W = 420;
@@ -1587,21 +1619,64 @@
         scene.holeY = H - 542;
       }
     },
+    // ── Hole 2: "The Maze" (Par 8) ──
+    // A closed maze structure. Navigate up through corridors,
+    // around walls, avoiding water and bunkers.
     {
       id: 'hole2',
-      par: 4,
+      par: 8,
       build(scene) {
-        scene.addPlatform(px(68), H - 180, pw(42), 12);
+        // ── Bottom box structure ──
 
-        scene.addPlatform(px(26), H - 360, pw(26), 12);
-        scene.addBunker(px(26), H - 360, pw(24), 12);
+        // 1: bottom of box — from water right edge to right wall left edge only
+        scene.addPlatform(px(81), H - 100, pw(25), 12);
 
-        scene.addPlatform(px(76), H - 530, pw(24), 12);
+        // Water — gap in the floor, ball falls through if it lands here
+        scene.addWater(px(60), H - 100, pw(18), 16);
 
-        scene.addPlatform(px(42), H - 690, pw(29), 12);
+        // 5b: vertical wall dividing bottom (centered in map)
+        scene.addBoxWall(px(50), H - 150, 10, 100);
 
-        scene.holeX = px(42);
-        scene.holeY = H - 702;
+        // 5: inner shelf — LEFT side of 5b, half width
+        scene.addPlatform(px(43), H - 200, pw(12), 12);
+
+        // 3: left wall of box — hugs left edge, up to meet platform 4
+        scene.addBoxWall(px(5), H - 220, 10, 240);
+
+        // 4: top of box — shortened from right
+        scene.addPlatform(px(27), H - 340, pw(40), 12);
+
+        // 4c: vertical wall down from right end of 4 (shortened)
+        scene.addBoxWall(px(47), H - 300, 10, 80);
+
+        // 2: right wall of box — from bottom up to platform 7
+        scene.addBoxWall(px(95), H - 290, 10, 380);
+
+        // 6: exit ledge — shorter, sticking out left from right wall
+        scene.addPlatform(px(87), H - 230, pw(15), 12);
+
+        // ── Middle level ──
+        // 7: platform above box — right edge meets right wall
+        scene.addPlatform(px(68), H - 480, pw(55), 12);
+        scene.addBunker(px(58), H - 480, pw(28), 12);
+
+        // ── Upper level ──
+        // 8: tall left wall
+        scene.addBoxWall(px(10), H - 575, 10, 280);
+
+        // 9: left ledge extending right from tall wall
+        scene.addPlatform(px(22), H - 600, pw(22), 12);
+
+        // 10: upper right platform with bunker
+        scene.addPlatform(px(75), H - 690, pw(38), 12);
+        scene.addBunker(px(75), H - 690, pw(28), 12);
+
+        // ── Top — the green (raised higher for ceiling room) ──
+        // 11: green with hole
+        scene.addPlatform(px(48), H - 750, pw(24), 12);
+
+        scene.holeX = px(48);
+        scene.holeY = H - 762;
       }
     },
     {
@@ -1631,6 +1706,152 @@
 
         scene.holeX = px(32);
         scene.holeY = H - 702;
+      }
+    },
+    // ── Hole 5: "The Box" (Par 5) ──
+    // A long precise max-power drive to a small platform on the far
+    // left — only a driver at full power can barely reach it.
+    // From there, a short precise lob into a hollow box made of
+    // platforms. The box has a small gap in its roof — drop the
+    // ball through the gap to reach the hole inside.
+    {
+      id: 'hole5',
+      par: 5,
+      build(scene) {
+        // Small landing platform on the far left and high up —
+        // a full-power driver barely reaches this
+        scene.addPlatform(px(12), H - 550, pw(16), 12);
+
+        // ── The Box (centered at ~55%, between H-720 and H-660) ──
+        // Box floor — the hole sits on this
+        scene.addPlatform(px(55), H - 660, pw(34), 12);
+
+        // Box left wall
+        scene.addBoxWall(px(55) - pw(17), H - 690, 10, 60);
+
+        // Box right wall
+        scene.addBoxWall(px(55) + pw(17), H - 690, 10, 60);
+
+        // Box roof — two platforms with a gap in the middle
+        // Left roof section
+        scene.addPlatform(px(45), H - 720, pw(12), 10);
+        // Right roof section
+        scene.addPlatform(px(65), H - 720, pw(12), 10);
+        // Gap between them (~pw(10) wide) is where the ball drops in
+
+        // Hole inside the box on the floor
+        scene.holeX = px(55);
+        scene.holeY = H - 672;
+      }
+    },
+    // ── Hole 6: "The Long Drive" (Par 3) ──
+    // A huge horizontal gap with water filling the chasm below.
+    // The green is far to the opposite side. Only a driver at
+    // near-full power can clear the water — anything else drops in.
+    // One of the rare holes where club choice IS the puzzle.
+    {
+      id: 'hole6',
+      par: 3,
+      build(scene) {
+        // Tee-side ledge on the far left — ball starts on floor, must
+        // reach this first ledge on the left side
+        scene.addPlatform(px(18), H - 180, pw(22), 12);
+
+        // Massive water hazard spanning the gap
+        scene.addWater(px(55), H - 160, pw(48), 36);
+
+        // Green on the far right — only a full-power driver can bridge the gap
+        scene.addPlatform(px(85), H - 280, pw(18), 12);
+
+        scene.holeX = px(85);
+        scene.holeY = H - 292;
+      }
+    },
+    // ── Hole 7: "Wedge It!" (Par 7) ──
+    // Tiny narrow platforms with spacing tuned exactly for the wedge's
+    // steep, short arc. A driver wildly overshoots every gap.
+    // 7 stepping-stone platforms zigzagging up to the green.
+    // Club restriction: 9 iron, wedge, putter only.
+    {
+      id: 'hole7',
+      par: 6,
+      clubs: ['wedge', '9iron', 'putter'],
+      build(scene) {
+        // Step 1 — far left
+        scene.addPlatform(px(30), H - 200, pw(11), 12);
+
+        // Step 3 — far right
+        scene.addPlatform(px(72), H - 300, pw(11), 12);
+
+        // Step 4 — far left
+        scene.addPlatform(px(28), H - 400, pw(11), 12);
+
+        // Step 5 — far right
+        scene.addPlatform(px(70), H - 500, pw(11), 12);
+
+        // Step 6 — left
+        scene.addPlatform(px(32), H - 600, pw(11), 12);
+
+        // Green — tiny, with plenty of ceiling room
+        scene.addPlatform(px(65), H - 700, pw(11), 12);
+
+        scene.holeX = px(65);
+        scene.holeY = H - 712;
+      }
+    },
+    // ── Hole 8: "The Gauntlet" (Par 5) ──
+    // Long and punishing — water, bunkers, and narrow platforms.
+    // Mid-hole requires a precise wedge lob onto a tiny shelf,
+    // then a long drive across water to finish.
+    {
+      id: 'hole8',
+      par: 5,
+      build(scene) {
+        // Step 1 — generous first landing
+        scene.addPlatform(px(30), H - 170, pw(36), 12);
+
+        // Step 2 — bunkered mid shelf
+        scene.addPlatform(px(72), H - 310, pw(30), 12);
+        scene.addBunker(px(72), H - 310, pw(22), 12);
+
+        // Step 3 — tiny shelf requiring a precise lob (wedge territory)
+        scene.addPlatform(px(35), H - 440, pw(16), 12);
+
+        // Water gap — need power to clear
+        scene.addWater(px(55), H - 550, pw(44), 32);
+
+        // Step 4 — landing beyond the water
+        scene.addPlatform(px(70), H - 630, pw(24), 12);
+
+        // Green — small target
+        scene.addPlatform(px(40), H - 770, pw(22), 12);
+
+        scene.holeX = px(40);
+        scene.holeY = H - 782;
+      }
+    },
+    // ── Hole 9: "The Island" (Par 4) ──
+    // Tiny island green flanked by water on both sides.
+    // Precision is everything — overshoot or undershoot and you're wet.
+    {
+      id: 'hole9',
+      par: 4,
+      build(scene) {
+        // First landing — comfortable
+        scene.addPlatform(px(40), H - 200, pw(36), 12);
+
+        // Mid platform — slightly narrow
+        scene.addPlatform(px(65), H - 390, pw(26), 12);
+
+        // Water flanking both sides of the island
+        scene.addWater(px(22), H - 590, pw(28), 36);
+        scene.addWater(px(78), H - 590, pw(28), 36);
+
+        // The island — tiny green between the water
+        scene.addPlatform(px(50), H - 600, pw(16), 12);
+
+        scene.holeX = px(50);
+        scene.holeY = H - 612;
       }
     },
   ];
@@ -1719,7 +1940,7 @@
     holeSelectOverlay.classList.add('hide');
     document.getElementById('header').classList.remove('hide');
     document.getElementById('game-area').classList.remove('hide');
-    selectClub('driver');
+    applyClubRestrictions();
     lastRoundStrokes = 0;
     skipIntroPan = false;
     bunkerIndicator.classList.remove('show');
@@ -1831,11 +2052,21 @@
       this.bumpers = [];
       this.bunkers = [];
       this.waterHazards = [];
+      this.boxWalls = [];
       this.inBunker = false;
       this.lastSafePlatform = { x: W / 2, y: H - 26 }; // tee position
 
       // Floor
       this.addPlatform(W / 2, H - 10, W - 8, 20);
+
+      // Safety floor — extra thick invisible barrier below the visible floor
+      // Catches any ball that tunnels through the main floor
+      this.matter.add.rectangle(W / 2, H + 30, W + 80, 60, {
+        isStatic: true,
+        restitution: 0.2,
+        friction: 0.8,
+        label: 'platform',
+      });
 
       // Walls — thick to prevent tunneling at high velocity
       const wallThick = 40;
@@ -1980,8 +2211,33 @@
     }
 
     addWater(x, y, w, h) {
-      // Water hazard: no physics body, just a zone
+      // Water detection zone (top portion — ball falls in from above)
       this.waterHazards.push({ x, y, w, h });
+      // Solid platform body underneath — ball bounces off from below
+      const physH = 40;
+      const bodyY = y + h / 2 + physH / 2 - 4; // position body at bottom of water
+      this.matter.add.rectangle(x, bodyY, w, physH, {
+        isStatic: true,
+        restitution: T.platBounce,
+        friction: 0.8,
+        label: 'platform',
+      });
+    }
+
+    addBoxWall(x, y, w, h) {
+      // Vertical wall segment for box structures
+      // Physics body slightly wider than visual (20px vs 10px) to prevent
+      // tunneling, but not so wide it feels invisible. Max ball velocity
+      // is 28, so 20px is safe (ball can't skip through in one frame).
+      const visualW = 10;
+      const physW = 20;
+      const body = this.matter.add.rectangle(x, y, physW, h, {
+        isStatic: true,
+        restitution: T.wallBounce,
+        friction: 0.3,
+        label: 'wall',
+      });
+      this.boxWalls.push({ body, x, y, w: visualW, h });
     }
 
     drawAim(pointer) {
@@ -2054,7 +2310,11 @@
       }
 
       const vx = Math.cos(angle) * shotPower;
-      const vy = Math.sin(angle) * shotPower;
+      let vy = Math.sin(angle) * shotPower;
+
+      // Cap extreme downward velocity — gravity compounds it,
+      // so limit only hard downward shots to prevent floor tunneling
+      if (vy > 20) vy = 20;
 
       const MatterBody = Phaser.Physics.Matter.Matter.Body;
       MatterBody.setVelocity(this.ball, { x: vx, y: vy });
@@ -2100,6 +2360,33 @@
           const scale = maxV / speed;
           MatterBody.setVelocity(this.ball, { x: vel.x * scale, y: vel.y * scale });
         }
+
+        // ── Out-of-bounds recovery ──
+        // If ball escapes the world, reset to last safe position + penalty
+        const bx = this.ball.position.x;
+        const by = this.ball.position.y;
+        if (by > H + 30 || by < -60 || bx < -60 || bx > W + 60) {
+          MatterBody.setVelocity(this.ball, { x: 0, y: 0 });
+          MatterBody.setPosition(this.ball, {
+            x: this.lastSafePlatform.x,
+            y: this.lastSafePlatform.y - 10
+          });
+          this.strokes++;
+          lastRoundStrokes = this.strokes;
+          document.getElementById('hud-strokes').textContent = this.strokes;
+          this.canShoot = true;
+          this.settled = true;
+          this.settleTimer = 0;
+          const wp = document.getElementById('water-penalty');
+          wp.textContent = 'Out of Bounds · +1 Stroke';
+          wp.classList.remove('show');
+          void wp.offsetWidth;
+          wp.classList.add('show');
+          setTimeout(() => {
+            wp.classList.remove('show');
+            wp.textContent = 'Water Hazard · +1 Stroke';
+          }, 1600);
+        }
       }
 
       // ── Settle detection ──
@@ -2119,7 +2406,7 @@
         }
       }
 
-      // ── Water hazard detection ──
+      // ── Water hazard detection — triggers on surface contact ──
       if (!this.holeComplete && this.waterHazards.length > 0 && this.shotFired && !this.canShoot) {
         const bx = this.ball.position.x;
         const by = this.ball.position.y;
@@ -2127,9 +2414,9 @@
           const left = wh.x - wh.w / 2;
           const right = wh.x + wh.w / 2;
           const top = wh.y - wh.h / 2;
-          const bottom = wh.y + wh.h / 2;
-          if (bx >= left && bx <= right && by >= top && by <= bottom) {
-            // Ball hit water — penalty stroke, reset to last safe position
+          // Ball radius is 7 — detect when ball touches the water surface
+          if (bx >= left && bx <= right && by >= top - 8 && by <= top + wh.h) {
+            // Ball touched water — penalty stroke, reset to last safe position
             const MatterBody = Phaser.Physics.Matter.Matter.Body;
             MatterBody.setVelocity(this.ball, { x: 0, y: 0 });
             MatterBody.setPosition(this.ball, {
@@ -2344,69 +2631,130 @@
         drawGrassPlatform(p.x, p.y, p.w, p.h, false);
       });
 
-      // Bunkers (sand traps)
+      // Box walls (vertical earth/dirt walls)
+      this.boxWalls.forEach(bw => {
+        const left = bw.x - bw.w / 2;
+        const top = bw.y - bw.h / 2;
+        const ww = bw.w;
+        const wh = bw.h;
+        // Base dirt fill
+        this.gfx.fillStyle(0x6b4025, 1);
+        this.gfx.fillRect(left, top, ww, wh);
+        // Lighter dirt band
+        this.gfx.fillStyle(0x8b5e3c, 1);
+        this.gfx.fillRect(left, top, Math.ceil(ww * 0.4), wh);
+        // Dark edge
+        this.gfx.fillStyle(0x4a2a15, 1);
+        this.gfx.fillRect(left + ww - 2, top, 2, wh);
+        // Grass on top edge
+        this.gfx.fillStyle(0x5cc828, 1);
+        this.gfx.fillRect(left, top, ww, 3);
+        this.gfx.fillStyle(0x7ee038, 1);
+        this.gfx.fillRect(left, top, ww, 1);
+        // Dirt texture
+        for (let dy = 0; dy < wh; dy += 4) {
+          const n = Math.sin(dy * 11.3 + left * 3.7);
+          if (n > 0.3) {
+            this.gfx.fillStyle(0x9a6b45, 0.4);
+            this.gfx.fillRect(left + 1, top + dy, ww - 2, 2);
+          }
+        }
+      });
+
+      // Bunkers (sand traps — sandy yellow with purple undertone, grass edges)
       this.bunkers.forEach(bk => {
         const left = bk.x - bk.w / 2;
         const top = bk.y - bk.h / 2;
         const bw = bk.w;
         const bh = bk.h;
-        // Sand base
-        this.gfx.fillStyle(0xc2a05a, 1);
+        // Purple/mauve undertone layer
+        this.gfx.fillStyle(0x8a6080, 1);
         this.gfx.fillRect(left, top, bw, bh);
-        // Lighter sand top
-        this.gfx.fillStyle(0xd4b86a, 1);
-        this.gfx.fillRect(left, top, bw, Math.max(2, Math.floor(bh * 0.35)));
-        // Sand texture
-        this.gfx.fillStyle(0xa88940, 0.6);
-        for (let dx = 0; dx < bw; dx += 5) {
-          for (let dy = 0; dy < bh; dy += 4) {
-            if (Math.sin(dx * 11.3 + dy * 9.7 + left) > 0.4) {
-              this.gfx.fillRect(left + dx, top + dy, 2, 2);
-            }
+        // Sandy yellow main surface
+        this.gfx.fillStyle(0xd4b060, 1);
+        this.gfx.fillRect(left, top, bw, Math.floor(bh * 0.7));
+        // Lighter sand top band
+        this.gfx.fillStyle(0xe8cc78, 1);
+        this.gfx.fillRect(left, top, bw, Math.max(2, Math.floor(bh * 0.3)));
+        // Brightest top edge
+        this.gfx.fillStyle(0xf0da88, 1);
+        this.gfx.fillRect(left, top, bw, 2);
+        // Sand texture — varied grains
+        for (let dx = 0; dx < bw; dx += 3) {
+          const n = Math.sin(dx * 19.3 + left * 7.1);
+          if (n > 0.2) {
+            this.gfx.fillStyle(0xc0a048, 0.6);
+            this.gfx.fillRect(left + dx, top + 2, 2, Math.floor(bh * 0.5));
+          }
+          if (n < -0.3) {
+            this.gfx.fillStyle(0xe8d080, 0.5);
+            this.gfx.fillRect(left + dx, top + 1, 1, Math.floor(bh * 0.3));
           }
         }
-        // Light speckles
-        this.gfx.fillStyle(0xe0cc80, 0.5);
-        for (let dx = 0; dx < bw; dx += 6) {
-          if (Math.cos(dx * 7.7 + left) > 0.3) {
-            this.gfx.fillRect(left + dx, top + 1, 2, 1);
-          }
+        // Grass tufts on left and right edges
+        for (let dy = 0; dy < bh; dy += 3) {
+          const nl = Math.sin(dy * 11.7 + left) > 0.3;
+          const nr = Math.cos(dy * 13.3 + left) > 0.3;
+          if (nl) { this.gfx.fillStyle(0x4ac520, 0.8); this.gfx.fillRect(left - 1, top + dy, 3, 2); }
+          if (nr) { this.gfx.fillStyle(0x3a9e18, 0.8); this.gfx.fillRect(left + bw - 2, top + dy, 3, 2); }
         }
-        // Darker bottom edge (depth)
-        this.gfx.fillStyle(0x8a7038, 1);
-        this.gfx.fillRect(left, top + bh - 2, bw, 2);
+        // Grass highlight on top edges
+        this.gfx.fillStyle(0x6bde40, 0.7);
+        this.gfx.fillRect(left, top - 1, 4, 2);
+        this.gfx.fillRect(left + bw - 4, top - 1, 4, 2);
       });
 
-      // Water hazards
+      // Water hazards (bright blue with dirt base, no grass)
       this.waterHazards.forEach(wh => {
         const left = wh.x - wh.w / 2;
         const top = wh.y - wh.h / 2;
         const ww = wh.w;
         const wHt = wh.h;
-        // Deep water base
-        this.gfx.fillStyle(0x0a3060, 0.85);
-        this.gfx.fillRect(left, top, ww, wHt);
-        // Lighter water surface
-        this.gfx.fillStyle(0x1a5090, 0.7);
-        this.gfx.fillRect(left, top, ww, Math.max(3, Math.floor(wHt * 0.3)));
+        const dirtH = Math.max(3, Math.floor(wHt * 0.25));
+        const waterH = wHt - dirtH;
+
+        // Dirt base layer
+        this.gfx.fillStyle(0x6b3a1f, 1);
+        this.gfx.fillRect(left, top + waterH, ww, dirtH);
+        this.gfx.fillStyle(0x4a2812, 1);
+        this.gfx.fillRect(left, top + waterH + Math.floor(dirtH * 0.5), ww, Math.ceil(dirtH * 0.5));
+        for (let dx = 0; dx < ww; dx += 5) {
+          if (Math.sin(dx * 13.7 + left) > 0.3) {
+            this.gfx.fillStyle(0x7d4525, 0.5);
+            this.gfx.fillRect(left + dx, top + waterH + 1, 2, 2);
+          }
+        }
+
+        // Water body — gradient from bright to deep blue
+        this.gfx.fillStyle(0x1060aa, 1);
+        this.gfx.fillRect(left, top, ww, waterH);
+        // Lighter upper water
+        this.gfx.fillStyle(0x2888cc, 1);
+        this.gfx.fillRect(left, top, ww, Math.floor(waterH * 0.4));
+        // Brightest surface
+        this.gfx.fillStyle(0x40a8e8, 1);
+        this.gfx.fillRect(left, top, ww, Math.max(2, Math.floor(waterH * 0.15)));
+
         // Animated wave highlights
         const waveOffset = time * 0.002;
-        this.gfx.fillStyle(0x3388cc, 0.4);
-        for (let dx = 0; dx < ww; dx += 8) {
-          const wy = Math.sin(dx * 0.15 + waveOffset) * 2;
-          this.gfx.fillRect(left + dx, top + 2 + wy, 5, 1);
+        this.gfx.fillStyle(0x60c8f8, 0.5);
+        for (let dx = 0; dx < ww; dx += 6) {
+          const wy = Math.sin(dx * 0.2 + waveOffset) * 1.5;
+          this.gfx.fillRect(left + dx, top + 2 + wy, 4, 1);
         }
-        // Sparkle pixels
-        this.gfx.fillStyle(0x66bbee, 0.5);
-        for (let dx = 0; dx < ww; dx += 12) {
-          const sparkle = Math.sin(dx * 5.3 + waveOffset * 3) > 0.7 ? 1 : 0;
-          if (sparkle) {
+        // Secondary wave
+        this.gfx.fillStyle(0x3090d0, 0.4);
+        for (let dx = 0; dx < ww; dx += 8) {
+          const wy = Math.cos(dx * 0.15 + waveOffset * 0.7 + 2) * 2;
+          this.gfx.fillRect(left + dx + 3, top + Math.floor(waterH * 0.3) + wy, 3, 1);
+        }
+        // Bright sparkle pixels
+        this.gfx.fillStyle(0x88ddff, 0.6);
+        for (let dx = 0; dx < ww; dx += 10) {
+          if (Math.sin(dx * 5.3 + waveOffset * 3) > 0.7) {
             this.gfx.fillRect(left + dx, top + 1, 2, 1);
           }
         }
-        // Dark bottom edge
-        this.gfx.fillStyle(0x051a35, 1);
-        this.gfx.fillRect(left, top + wHt - 2, ww, 2);
       });
 
       // Bounce blocks (pixel crystal style)
@@ -2506,8 +2854,8 @@
     parent: 'game-container',
     backgroundColor: '#020818',
     scale: {
-      mode: Phaser.Scale.FIT,
-      autoCenter: Phaser.Scale.CENTER_BOTH,
+      mode: Phaser.Scale.NONE,
+      autoCenter: Phaser.Scale.NO_CENTER,
     },
     input: {
       activePointers: 1,
@@ -2545,7 +2893,7 @@
     document.getElementById('end-round-btn').classList.remove('hide');
     document.getElementById('restart-btn').classList.toggle('hide', isMember);
     syncMobileButtons();
-    selectClub('driver');
+    applyClubRestrictions();
     lastRoundStrokes = 0;
     skipIntroPan = false;
     bunkerIndicator.classList.remove('show');
@@ -2616,7 +2964,7 @@
     overlay.classList.remove('show');
     instructionsEl.classList.remove('hide');
     bunkerIndicator.classList.remove('show');
-    selectClub('driver');
+    applyClubRestrictions();
     lastRoundStrokes = 0;
     skipIntroPan = false;
     if (game) game.destroy(true);
@@ -2630,7 +2978,7 @@
     instructionsEl.classList.remove('hide');
     bunkerIndicator.classList.remove('show');
     if (lastRoundStrokes > 1) {
-      selectClub('driver');
+      applyClubRestrictions();
     }
     skipIntroPan = true;
     if (game) game.destroy(true);
@@ -2657,7 +3005,7 @@
     overlay.classList.remove('show');
     instructionsEl.classList.remove('hide');
     bunkerIndicator.classList.remove('show');
-    selectClub('driver');
+    applyClubRestrictions();
     lastRoundStrokes = 0;
     skipIntroPan = false;
     if (game) game.destroy(true);
@@ -2666,6 +3014,8 @@
   }
 
   function setupCanvas() {
+    // Pre-size the container immediately so Phaser renders at the right size
+    resizeGame();
     setTimeout(() => {
       // Prevent touch scrolling on canvas
       const canvas = document.querySelector('#game-container canvas');
@@ -2685,7 +3035,6 @@
           if (e.target === container || e.target === canvas) e.preventDefault();
         }, { passive: false });
       });
-      resizeGame();
     }, 150);
   }
 
