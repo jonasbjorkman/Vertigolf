@@ -596,7 +596,7 @@
     flex-direction: column;
     align-items: center;
     overflow-y: auto;
-    padding: 20px 20px 80px;
+    padding: 20px 20px 120px;
     z-index: 200;
   }
 
@@ -1018,7 +1018,8 @@
     padding: 16px 12px 12px;
     box-shadow: 0 4px 16px rgba(0,0,0,0.4);
     position: relative;
-    overflow: hidden;
+    overflow: visible;
+    flex-shrink: 0;
   }
 
   #scoreboards-section::before {
@@ -1507,8 +1508,8 @@
   // Each club has unique physics: power, maxDrag, airFriction
   // Shared physics: gravity, surface bounce, friction, settle
   const CLUBS = {
-    driver:  { minPower: 20, power: 39, maxDrag: 150, airFriction: 0.003 },
-    '5wood': { minPower: 15, power: 33, maxDrag: 140, airFriction: 0.006 },
+    driver:  { minPower: 20, power: 37, maxDrag: 150, airFriction: 0.003 },
+    '5wood': { minPower: 15, power: 31, maxDrag: 140, airFriction: 0.006 },
     '5iron': { minPower: 10, power: 28, maxDrag: 130, airFriction: 0.010 },
     '7iron': { minPower: 7,  power: 26, maxDrag: 120, airFriction: 0.014 },
     '9iron': { minPower: 4,  power: 20, maxDrag: 110, airFriction: 0.020 },
@@ -1612,18 +1613,28 @@
       id: 'hole1',
       par: 3,
       build(scene) {
-        scene.addPlatform(px(29), H - 180, pw(37), 12);
+        scene.addPlatform(px(24), H - 180, pw(37), 12);
         scene.addPlatform(px(74), H - 360, pw(37), 12);
         scene.addPlatform(px(49), H - 530, pw(32), 12);
         scene.holeX = px(49);
         scene.holeY = H - 542;
       }
     },
-    // ── Hole 2: "The Maze" (Par 8) ──
+    {
+      id: 'hole2',
+      par: 3,
+      build(scene) {
+        scene.addPlatform(px(50), H - 450, pw(18), 12);
+
+        scene.holeX = px(50);
+        scene.holeY = H - 462;
+      }
+    },
+    // ── Hole 3: "The Maze" (Par 8) ──
     // A closed maze structure. Navigate up through corridors,
     // around walls, avoiding water and bunkers.
     {
-      id: 'hole2',
+      id: 'hole3',
       par: 8,
       build(scene) {
         // ── Bottom box structure ──
@@ -1679,36 +1690,77 @@
         scene.holeY = H - 762;
       }
     },
-    {
-      id: 'hole3',
-      par: 3,
-      build(scene) {
-        scene.addPlatform(px(50), H - 450, pw(18), 12);
-
-        scene.holeX = px(50);
-        scene.holeY = H - 462;
-      }
-    },
+    // ── Hole 4: "The Funnel" (Par 8) ──
+    // Three tall vertical walls create four channels. Gaps in the walls
+    // let you shoot between channels. Small platforms scattered at
+    // different heights. Clubs restricted to wedge, 9-iron, putter.
     {
       id: 'hole4',
-      par: 5,
+      par: 8,
+      clubs: ['7iron', '9iron', 'wedge', 'putter'],
       build(scene) {
-        scene.addPlatform(px(26), H - 220, pw(32), 12);
+        // ── Three vertical walls (equal height, with gaps) ──
 
-        scene.addWater(px(79), H - 320, pw(26), 30);
+        // W1 at px(24) — three segments with two gaps
+        scene.addBoxWall(px(24), H - 505, 10, 100);  // top segment (shortened to extend top gap)
+        scene.addBoxWall(px(24), H - 330, 10, 90);   // middle segment
+        scene.addBoxWall(px(24), H - 180, 10, 100);  // bottom segment
 
-        scene.addPlatform(px(46), H - 390, pw(29), 12);
-        scene.addBunker(px(46), H - 390, pw(24), 12);
+        // W2 at px(50) — three segments with two gaps
+        scene.addBoxWall(px(50), H - 510, 10, 100);  // top segment
+        scene.addBoxWall(px(50), H - 350, 10, 120);  // middle segment
+        scene.addBoxWall(px(50), H - 170, 10, 80);   // bottom segment
 
-        scene.addPlatform(px(75), H - 540, pw(26), 12);
+        // W3 at px(74) — three segments with two gaps
+        scene.addBoxWall(px(74), H - 520, 10, 80);   // top segment
+        scene.addBoxWall(px(74), H - 340, 10, 100);  // middle segment (top gap extended down to P10 height)
+        scene.addBoxWall(px(74), H - 170, 10, 100);  // bottom segment
 
-        scene.addPlatform(px(32), H - 690, pw(29), 12);
+        // P12: small platform on top of W3
+        scene.addPlatform(px(74), H - 565, pw(10), 12);
 
-        scene.holeX = px(32);
-        scene.holeY = H - 702;
+        // ── Platforms ──
+
+        // P1: starting platform, hugging left wall
+        scene.addPlatform(px(7), H - 100, pw(14), 12);
+
+        // P2: bunker platform, channel between W1-W2
+        scene.addPlatform(px(37), H - 220, pw(22), 12);
+        scene.addBunker(px(37), H - 220, pw(16), 12);
+
+        // P3: mid-height, channel between W1-W2
+        scene.addPlatform(px(37), H - 370, pw(16), 12);
+
+        // P11: high platform between W1-W2, hugging W2
+        scene.addPlatform(px(40), H - 500, pw(16), 12);
+
+        // P9: top-left platform, spanning left wall to W1
+        scene.addPlatform(px(12), H - 560, pw(23), 12);
+
+        // P5: lowered, channel between W2-W3
+        scene.addPlatform(px(62), H - 230, pw(14), 12);
+
+        // P10: below where water is, channel between W2-W3
+        scene.addPlatform(px(62), H - 400, pw(18), 12);
+
+        // P6: water hazard, spanning from W2 to W3
+        scene.addWater(px(62), H - 520, pw(22), 16);
+
+        // P7: lowered, right of W3
+        scene.addPlatform(px(86), H - 250, pw(14), 12);
+
+        // P8: bunker platform, hugging right wall, wider
+        scene.addPlatform(px(91), H - 460, pw(18), 12);
+        scene.addBunker(px(91), H - 460, pw(14), 12);
+
+        // ── Green ──
+        scene.addPlatform(px(50), H - 670, pw(18), 12);
+
+        scene.holeX = px(50);
+        scene.holeY = H - 682;
       }
     },
-    // ── Hole 5: "The Box" (Par 5) ──
+    // ── Hole 5: "Better Hit Hard" (Par 5) ──
     // A long precise max-power drive to a small platform on the far
     // left — only a driver at full power can barely reach it.
     // From there, a short precise lob into a hollow box made of
@@ -1718,62 +1770,27 @@
       id: 'hole5',
       par: 5,
       build(scene) {
-        // Small landing platform on the far left and high up —
-        // a full-power driver barely reaches this
-        scene.addPlatform(px(12), H - 550, pw(16), 12);
+        // Small landing platform on the far left, extremely high
+        scene.addPlatform(px(12), H - 1200, pw(16), 12);
 
-        // ── The Box (centered at ~55%, between H-720 and H-660) ──
-        // Box floor — the hole sits on this
-        scene.addPlatform(px(55), H - 660, pw(34), 12);
+        // ── The Box ──
+        scene.addPlatform(px(55), H - 1310, pw(34), 12);
+        scene.addBoxWall(px(55) - pw(17), H - 1340, 10, 60);
+        scene.addBoxWall(px(55) + pw(17), H - 1340, 10, 60);
+        scene.addPlatform(px(45), H - 1370, pw(12), 10);
+        scene.addPlatform(px(65), H - 1370, pw(12), 10);
 
-        // Box left wall
-        scene.addBoxWall(px(55) - pw(17), H - 690, 10, 60);
-
-        // Box right wall
-        scene.addBoxWall(px(55) + pw(17), H - 690, 10, 60);
-
-        // Box roof — two platforms with a gap in the middle
-        // Left roof section
-        scene.addPlatform(px(45), H - 720, pw(12), 10);
-        // Right roof section
-        scene.addPlatform(px(65), H - 720, pw(12), 10);
-        // Gap between them (~pw(10) wide) is where the ball drops in
-
-        // Hole inside the box on the floor
         scene.holeX = px(55);
-        scene.holeY = H - 672;
+        scene.holeY = H - 1322;
       }
     },
-    // ── Hole 6: "The Long Drive" (Par 3) ──
-    // A huge horizontal gap with water filling the chasm below.
-    // The green is far to the opposite side. Only a driver at
-    // near-full power can clear the water — anything else drops in.
-    // One of the rare holes where club choice IS the puzzle.
-    {
-      id: 'hole6',
-      par: 3,
-      build(scene) {
-        // Tee-side ledge on the far left — ball starts on floor, must
-        // reach this first ledge on the left side
-        scene.addPlatform(px(18), H - 180, pw(22), 12);
-
-        // Massive water hazard spanning the gap
-        scene.addWater(px(55), H - 160, pw(48), 36);
-
-        // Green on the far right — only a full-power driver can bridge the gap
-        scene.addPlatform(px(85), H - 280, pw(18), 12);
-
-        scene.holeX = px(85);
-        scene.holeY = H - 292;
-      }
-    },
-    // ── Hole 7: "Wedge It!" (Par 7) ──
+    // ── Hole 6: "Wedge It!" (Par 7) ──
     // Tiny narrow platforms with spacing tuned exactly for the wedge's
     // steep, short arc. A driver wildly overshoots every gap.
     // 7 stepping-stone platforms zigzagging up to the green.
     // Club restriction: 9 iron, wedge, putter only.
     {
-      id: 'hole7',
+      id: 'hole6',
       par: 6,
       clubs: ['wedge', '9iron', 'putter'],
       build(scene) {
@@ -1799,6 +1816,29 @@
         scene.holeY = H - 712;
       }
     },
+    // ── Hole 7: "The Long Drive" (Par 3) ──
+    // A huge horizontal gap with water filling the chasm below.
+    // The green is far to the opposite side. Only a driver at
+    // near-full power can clear the water — anything else drops in.
+    // One of the rare holes where club choice IS the puzzle.
+    {
+      id: 'hole7',
+      par: 3,
+      build(scene) {
+        // Tee-side ledge on the far left — ball starts on floor, must
+        // reach this first ledge on the left side
+        scene.addPlatform(px(18), H - 180, pw(22), 12);
+
+        // Massive water hazard spanning the gap
+        scene.addWater(px(55), H - 160, pw(48), 16);
+
+        // Green on the far right — only a full-power driver can bridge the gap
+        scene.addPlatform(px(85), H - 280, pw(18), 12);
+
+        scene.holeX = px(85);
+        scene.holeY = H - 292;
+      }
+    },
     // ── Hole 8: "The Gauntlet" (Par 5) ──
     // Long and punishing — water, bunkers, and narrow platforms.
     // Mid-hole requires a precise wedge lob onto a tiny shelf,
@@ -1818,7 +1858,7 @@
         scene.addPlatform(px(35), H - 440, pw(16), 12);
 
         // Water gap — need power to clear
-        scene.addWater(px(55), H - 550, pw(44), 32);
+        scene.addWater(px(55), H - 550, pw(44), 16);
 
         // Step 4 — landing beyond the water
         scene.addPlatform(px(70), H - 630, pw(24), 12);
@@ -1844,8 +1884,8 @@
         scene.addPlatform(px(65), H - 390, pw(26), 12);
 
         // Water flanking both sides of the island
-        scene.addWater(px(22), H - 590, pw(28), 36);
-        scene.addWater(px(78), H - 590, pw(28), 36);
+        scene.addWater(px(22), H - 590, pw(28), 16);
+        scene.addWater(px(78), H - 590, pw(28), 16);
 
         // The island — tiny green between the water
         scene.addPlatform(px(50), H - 600, pw(16), 12);
@@ -1854,7 +1894,7 @@
         scene.holeY = H - 612;
       }
     },
-  ];
+  ]
 
   let currentHole = 0;
 
@@ -2030,21 +2070,21 @@
       // Update HUD
       document.getElementById('hud-strokes').textContent = '0';
 
-      // Generate stars
+      // Generate stars — spread across full vertical range
       this.stars = [];
-      for (let i = 0; i < 50; i++) {
+      for (let i = 0; i < 80; i++) {
         this.stars.push({
           x: Math.random() * W,
-          y: Math.random() * (H - 60),
+          y: -1200 + Math.random() * (H + 1200 - 60),
           size: Math.random() < 0.3 ? 2 : 1,
           twinkle: Math.random() * Math.PI * 2,
           speed: 0.5 + Math.random() * 2,
         });
       }
 
-      // ── Camera setup ──
-      this.cameras.main.setBounds(0, 0, W, H);
-      this.matter.world.setBounds(0, 0, W, H, 1, false, false, false, false); // only for world size, we use our own walls
+      // ── Camera setup — no ceiling ──
+      this.cameras.main.setBounds(0, -1200, W, H + 1200);
+      this.matter.world.setBounds(0, -1200, W, H + 1200, 1, false, false, false, false);
 
       // ── Build level ──
       this.platforms = [];
@@ -2059,8 +2099,7 @@
       // Floor
       this.addPlatform(W / 2, H - 10, W - 8, 20);
 
-      // Safety floor — extra thick invisible barrier below the visible floor
-      // Catches any ball that tunnels through the main floor
+      // Safety floor
       this.matter.add.rectangle(W / 2, H + 30, W + 80, 60, {
         isStatic: true,
         restitution: 0.2,
@@ -2068,12 +2107,13 @@
         label: 'platform',
       });
 
-      // Walls — thick to prevent tunneling at high velocity
+      // Side walls — extend from above to below floor, no ceiling
       const wallThick = 40;
-      const wallL = this.matter.add.rectangle(-wallThick / 2 + 4, H / 2, wallThick, H, { isStatic: true, restitution: T.wallBounce, friction: 0.3, label: 'wall' });
-      const wallR = this.matter.add.rectangle(W + wallThick / 2 - 4, H / 2, wallThick, H, { isStatic: true, restitution: T.wallBounce, friction: 0.3, label: 'wall' });
-      const ceiling = this.matter.add.rectangle(W / 2, -wallThick / 2 + 4, W + wallThick * 2, wallThick, { isStatic: true, restitution: T.wallBounce, friction: 0.3, label: 'wall' });
-      this.walls = [wallL, wallR, ceiling];
+      const wallCY = (H + 100) / 2 - 600;
+      const wallH = H + 1300;
+      const wallL = this.matter.add.rectangle(-wallThick / 2 + 4, wallCY, wallThick, wallH, { isStatic: true, restitution: T.wallBounce, friction: 0, frictionStatic: 0, label: 'wall' });
+      const wallR = this.matter.add.rectangle(W + wallThick / 2 - 4, wallCY, wallThick, wallH, { isStatic: true, restitution: T.wallBounce, friction: 0, frictionStatic: 0, label: 'wall' });
+      this.walls = [wallL, wallR];
 
       // Build current hole
       getCurrentHole().build(this);
@@ -2087,8 +2127,10 @@
         restitution: 0.5,
         friction: T.friction,
         frictionAir: T.airFriction,
+        frictionStatic: 0,
         density: 0.002,
         label: 'ball',
+        slop: 0.5,
       });
       this.ballStartX = W / 2;
       this.ballStartY = H - 26;
@@ -2098,8 +2140,12 @@
       this.gfx = this.add.graphics();
       this.aimGfx = this.add.graphics();
 
-      // Draw sky gradient (once, static)
+      // Draw sky gradient (extends upward for no-ceiling world)
       const skyColors = [0x020818, 0x061230, 0x0c1e4a, 0x132a5c, 0x1a3670, 0x1f3f7a];
+      // Fill upper area with darkest sky
+      this.bgGfx.fillStyle(0x020818, 1);
+      this.bgGfx.fillRect(0, -1200, W, 1200);
+      // Normal sky gradient
       const bandH = Math.ceil(H / skyColors.length);
       skyColors.forEach((c, i) => {
         this.bgGfx.fillStyle(c, 1);
@@ -2145,7 +2191,7 @@
         this.canShoot = true;
       } else {
         // Start looking at the hole — position it about 1/3 down from top of viewport
-        cam.scrollY = Math.max(0, this.holeY - VIEW_H * 0.3);
+        cam.scrollY = this.holeY - VIEW_H * 0.3;
         // Pan down to the ball after a short pause
         this.time.delayedCall(600, () => {
           cam.pan(W / 2, teeScrollY + VIEW_H / 2, 1500, 'Sine.easeInOut', false, (cam, progress) => {
@@ -2159,9 +2205,11 @@
     }
 
     addPlatform(x, y, w, h) {
-      // Physics body is much thicker than visual to prevent tunneling
-      const physH = 40;
-      const body = this.matter.add.rectangle(x, y + (physH - h) / 2, w, physH, {
+      // Physics body slightly thicker than visual (24px vs 12px) centered
+      // on the platform. Prevents tunneling with only 6px invisible
+      // above and below — much less than the old 40px approach.
+      const physH = Math.max(h, 24);
+      const body = this.matter.add.rectangle(x, y, w, physH, {
         isStatic: true,
         restitution: T.platBounce,
         friction: 0.8,
@@ -2198,9 +2246,9 @@
     }
 
     addBunker(x, y, w, h) {
-      // Bunker: extreme friction, ball dies on contact
-      const physH = 40;
-      const body = this.matter.add.rectangle(x, y + (physH - h) / 2, w, physH, {
+      // Bunker: extreme friction — physics body slightly thicker to prevent tunneling
+      const physH = Math.max(h, 24);
+      const body = this.matter.add.rectangle(x, y, w, physH, {
         isStatic: true,
         restitution: 0.0,
         friction: 5.0,
@@ -2211,22 +2259,29 @@
     }
 
     addWater(x, y, w, h) {
-      // Water detection zone — penalty triggers on surface contact
-      // No physics body needed since ball resets before passing through
+      // Water detection zone — penalty triggers on surface contact from above
       this.waterHazards.push({ x, y, w, h });
+      // Solid body matching the visual water block exactly — ball bounces off from below
+      this.matter.add.rectangle(x, y, w, h, {
+        isStatic: true,
+        restitution: T.platBounce,
+        friction: 0.8,
+        label: 'water_body',
+      });
     }
 
     addBoxWall(x, y, w, h) {
       // Vertical wall segment for box structures
-      // Physics body slightly wider than visual (20px vs 10px) to prevent
-      // tunneling, but not so wide it feels invisible. Max ball velocity
-      // is 28, so 20px is safe (ball can't skip through in one frame).
+      // Physics body wider than visual to prevent tunneling.
+      // Low restitution reduces bounce velocity so ball can't
+      // ricochet through adjacent walls.
       const visualW = 10;
-      const physW = 20;
+      const physW = 28;
       const body = this.matter.add.rectangle(x, y, physW, h, {
         isStatic: true,
-        restitution: T.wallBounce,
-        friction: 0.3,
+        restitution: 0.4,
+        friction: 0,
+        frictionStatic: 0,
         label: 'wall',
       });
       this.boxWalls.push({ body, x, y, w: visualW, h });
@@ -2326,9 +2381,9 @@
       if (!this.introPanning && !this.holeComplete) {
         const by = this.ball.position.y;
         const cam = this.cameras.main;
-        // Target: keep ball in lower-middle of viewport
+        // Target: keep ball in lower-middle of viewport, follow all the way up
         const targetY = by - VIEW_H * 0.6;
-        const clampedY = Math.max(0, Math.min(H - VIEW_H, targetY));
+        const clampedY = Math.max(-1200, Math.min(H - VIEW_H, targetY));
         cam.scrollY += (clampedY - cam.scrollY) * 0.08;
       }
 
@@ -2357,7 +2412,7 @@
         // If ball escapes the world, reset to last safe position + penalty
         const bx = this.ball.position.x;
         const by = this.ball.position.y;
-        if (by > H + 30 || by < -60 || bx < -60 || bx > W + 60) {
+        if (by > H + 30 || by < -1300 || bx < -60 || bx > W + 60) {
           MatterBody.setVelocity(this.ball, { x: 0, y: 0 });
           MatterBody.setPosition(this.ball, {
             x: this.lastSafePlatform.x,
@@ -2398,36 +2453,40 @@
         }
       }
 
-      // ── Water hazard detection — triggers on surface contact ──
-      if (!this.holeComplete && this.waterHazards.length > 0 && this.shotFired && !this.canShoot) {
-        const bx = this.ball.position.x;
-        const by = this.ball.position.y;
-        for (const wh of this.waterHazards) {
-          const left = wh.x - wh.w / 2;
-          const right = wh.x + wh.w / 2;
-          const top = wh.y - wh.h / 2;
-          // Ball radius is 7 — detect when ball touches the water surface
-          if (bx >= left && bx <= right && by >= top - 8 && by <= top + wh.h) {
-            // Ball touched water — penalty stroke, reset to last safe position
-            const MatterBody = Phaser.Physics.Matter.Matter.Body;
-            MatterBody.setVelocity(this.ball, { x: 0, y: 0 });
-            MatterBody.setPosition(this.ball, {
-              x: this.lastSafePlatform.x,
-              y: this.lastSafePlatform.y - 10
-            });
-            this.strokes++;
-            lastRoundStrokes = this.strokes;
-            document.getElementById('hud-strokes').textContent = this.strokes;
-            this.canShoot = true;
-            this.settled = true;
-            this.settleTimer = 0;
-            // Show penalty notification
-            const wp = document.getElementById('water-penalty');
-            wp.classList.remove('show');
-            void wp.offsetWidth; // force reflow for re-animation
-            wp.classList.add('show');
-            setTimeout(() => wp.classList.remove('show'), 1600);
-            break;
+      // ── Water hazard detection — collision-based, can't miss ──
+      // Check Matter.js collision pairs for water_body contact
+      if (!this.holeComplete && this.shotFired) {
+        const pairs = this.matter.world.engine.pairs.list;
+        for (let i = 0; i < pairs.length; i++) {
+          const pair = pairs[i];
+          if (!pair.isActive) continue;
+          const a = pair.bodyA, b = pair.bodyB;
+          if (a.label === 'water_body' || b.label === 'water_body') {
+            const other = a.label === 'water_body' ? b : a;
+            if (other.label === 'ball') {
+              // Ball hit water — check it's coming from above (ball above water center)
+              const waterBody = a.label === 'water_body' ? a : b;
+              if (this.ball.position.y < waterBody.position.y) {
+                const MatterBody = Phaser.Physics.Matter.Matter.Body;
+                MatterBody.setVelocity(this.ball, { x: 0, y: 0 });
+                MatterBody.setPosition(this.ball, {
+                  x: this.lastSafePlatform.x,
+                  y: this.lastSafePlatform.y - 10
+                });
+                this.strokes++;
+                lastRoundStrokes = this.strokes;
+                document.getElementById('hud-strokes').textContent = this.strokes;
+                this.canShoot = true;
+                this.settled = true;
+                this.settleTimer = 0;
+                const wp = document.getElementById('water-penalty');
+                wp.classList.remove('show');
+                void wp.offsetWidth;
+                wp.classList.add('show');
+                setTimeout(() => wp.classList.remove('show'), 1600);
+              }
+              break;
+            }
           }
         }
       }
